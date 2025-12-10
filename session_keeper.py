@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from burp import IBurpExtender, ITab, IContextMenuFactory
+from burp import IBurpExtender, ITab, IContextMenuFactory, IExtensionStateListener
 from java.util import ArrayList, Date
 from javax.swing import (
     JPanel, JButton, JTextField, JTextArea, JLabel,
@@ -106,7 +106,6 @@ class SessionPanel(JPanel):
         control_panel.add(self.status_label)
         self.add(control_panel, BorderLayout.NORTH)
 
-        # Text areas with word wrap
         self.request_area = JTextArea()
         self.request_area.setEditable(False)
         self.request_area.setLineWrap(True)
@@ -125,25 +124,28 @@ class SessionPanel(JPanel):
         self.log_area.setWrapStyleWord(True)
         log_scroll = JScrollPane(self.log_area)
 
-        # Split: Response <-> Log
         lower_split = JSplitPane(JSplitPane.VERTICAL_SPLIT, response_scroll, log_scroll)
         lower_split.setResizeWeight(0.818)  # 45/(45+10)
         lower_split.setDividerLocation(0.818)
 
-        # Split: Request <-> (Response+Log)
         full_split = JSplitPane(JSplitPane.VERTICAL_SPLIT, request_scroll, lower_split)
         full_split.setResizeWeight(0.5)  # 45/(45+55)
         full_split.setDividerLocation(0.45)
 
         self.add(full_split, BorderLayout.CENTER)
 
-        # Stop countdown if fields are modified
-        from javax.swing.event import DocumentListener
         class FieldChangeListener(DocumentListener):
-            def __init__(slf, panel): slf.panel = panel
-            def insertUpdate(slf, e): slf.panel.stop_sender()
-            def removeUpdate(slf, e): slf.panel.stop_sender()
-            def changedUpdate(slf, e): slf.panel.stop_sender()
+            def __init__(slf, panel):
+                slf.panel = panel
+
+            def insertUpdate(slf, e):
+                slf.panel.stop_sender()
+
+            def removeUpdate(slf, e):
+                slf.panel.stop_sender()
+
+            def changedUpdate(slf, e):
+                slf.panel.stop_sender()
 
         listener = FieldChangeListener(self)
         self.interval_field.getDocument().addDocumentListener(listener)
@@ -183,6 +185,7 @@ class SessionPanel(JPanel):
             self.set_status("Invalid max requests")
             return
 
+        self.stop_sender()
         self.sender = KeepAliveSender(self, interval, max_requests)
         self.sender_thread = Thread(self.sender)
         self.sender_thread.start()
@@ -199,9 +202,11 @@ class SessionPanel(JPanel):
         if self.sender:
             self.sender.stop()
             self.sender = None
-            self.extender.update_tab_status(self, False)
-            self.start_button.setEnabled(True)
-            self.stop_button.setEnabled(False)
+        if self.sender_thread:
+            self.sender_thread = None
+        self.extender.update_tab_status(self, False)
+        self.start_button.setEnabled(True)
+        self.stop_button.setEnabled(False)
 
     def update_countdown(self, val):
         self.countdown_label.setText("Countdown: %ss" % val)
@@ -210,12 +215,13 @@ class SessionPanel(JPanel):
         self.status_label.setText(msg)
 
 
-class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
+class BurpExtender(IBurpExtender, ITab, IContextMenuFactory, IExtensionStateListener):
     def registerExtenderCallbacks(self, callbacks):
         self.callbacks = callbacks
         self.helpers = callbacks.getHelpers()
         callbacks.setExtensionName("Session Keeper")
         callbacks.registerContextMenuFactory(self)
+        callbacks.registerExtensionStateListener(self)
 
         self.session_tabs = JTabbedPane()
         self.session_tab_names = {}  # {SessionPanel: "base name"}
@@ -234,7 +240,8 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
 
     def createMenuItems(self, invocation):
         menu = ArrayList()
-        item = JMenuItem("Send to Session Keeper", actionPerformed=lambda e: self.send_to_new_session(invocation))
+        item = JMenuItem("Send to Session Keeper",
+                         actionPerformed=lambda e: self.send_to_new_session(invocation))
         menu.add(item)
         return menu
 
@@ -259,6 +266,21 @@ class BurpExtender(IBurpExtender, ITab, IContextMenuFactory):
         idx = self.session_tabs.indexOfComponent(panel)
         if idx != -1:
             self.session_tabs.setTitleAt(idx, base_name + " " + icon)
+
+    def extensionUnloaded(self):
+        """
+        Called by Burp when the extension is unloaded.
+        Stop any background sender threads cleanly.
+        """
+        try:
+            tab_count = self.session_tabs.getTabCount()
+        except Exception:
+            return
+
+        for i in range(tab_count):
+            comp = self.session_tabs.getComponentAt(i)
+            if isinstance(comp, SessionPanel):
+                comp.stop_sender()
 
     class TabMouseListener(MouseAdapter):
         def __init__(self, extender):
