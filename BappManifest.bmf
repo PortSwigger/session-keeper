@@ -7,7 +7,7 @@ SerialVersion: 1
 MinPlatformVersion: 2
 ProOnly: False
 Author: JoeBlackSecurity
-ShortDescription: Maintains server sessions by automatically resending low-impact requests at set intervals. Facilitates simultaneous management of multiple sessions through a tab-based system.
+ShortDescription: Keeps sessions alive by automatically resending low-impact requests at set intervals, with tab-based multi-session management.
 EntryPoint: session_keeper.py
 BuildCommand: 
 SupportedProducts: Pro, Community

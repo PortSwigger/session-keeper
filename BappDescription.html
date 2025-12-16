@@ -1,42 +1,24 @@
 <p>
-Session Keeper is a simple and quick way to keep your session alive in Burp Suite with minimal impact on your requests. This tool is perfect for those instances when you need to keep a session active while away from your desk or even when taking a break or a nap. You can ensure the session stays alive for as long as necessary, but remember that an everlasting session must be supported on the server-side.
+  Session Keeper maintains active sessions with minimal impact by automatically resending low-impact requests at
+  configurable intervals. This extension is ideal for keeping sessions alive during extended breaks or when stepping
+  away from testing, as long as the server supports persistent sessions.
 </p>
 
 <h2>Features</h2>
-
 <ul>
-  <li>Automatically resends a low-impact request to maintain active sessions</li>
-  <li>Runs multiple session keepers simultaneously using a tab-based system, with each tab managing an independent request and interval and displaying a status indicator: <strong>RUN</strong> when active, <strong>STOP</strong> when paused.
-    <ul>
-      <li>Each tab maintains its own request and interval independently</li>
-      <li>Tab names can be edited for easy identification</li>
-      <li>Status indicators show whether the session keeper is active or paused</li>
-    </ul>
-  </li>
-  <li>Supports custom intervals and maximum request limits</li>
-  <li>Shows the current request, the response, and the history of requests</li>
-  <li>Provides a Clear Log button to reset the history view</li>
-  <li>Features an easy-to-use UI within Burp Suite</li>
+  <li>Automatically resends requests at custom intervals to maintain session validity</li>
+  <li>Manages multiple sessions simultaneously with independent tab-based session keepers</li>
+  <li>Configurable request intervals and optional maximum request limits</li>
+  <li>Real-time status tracking with countdown timers and response history</li>
+  <li>Editable tab names with visual status indicators ([RUN] when active, [STOP] when paused)</li>
 </ul>
 
 <h2>Usage</h2>
-
-<p>
-Start by identifying a low-impact request that has a session you want to keep alive, such as a server time request, a simple API request, or a ping/pong request. Right-click the request and navigate to Extensions &rarr; Session Keeper &rarr; Send to Session Keeper.
-</p>
-
-<p>
-Next, go to the Session Keeper tab and determine the frequency for sending the low-impact request. You can set a maximum number of requests if you do not want to send them indefinitely and then click start.
-</p>
-
-<p>
-Session Keeper will start sending the request at the interval you set. Its important to note that the processing time of the request is not included in the countdown timer.
-</p>
-
-<p>
-The top window displays the current request being sent, the middle window shows the response, and the bottom window presents a history of the requests. If you need to reset the request history window, use the Clear Log button at the top.
-</p>
-
-<p>
-With Session Keeper, you can keep multiple sessions active simultaneously, thanks to its tab-based system.
-</p>
+<ol>
+  <li>Identify a low-impact request that maintains your session (such as server time, ping/pong, or a simple API
+    request)</li>
+  <li>Right-click the request and select "Extensions &rarr; Session Keeper &rarr; Send to Session Keeper"</li>
+  <li>Navigate to the Session Keeper tab</li>
+  <li>Set your desired interval in seconds and optionally specify a maximum number of requests</li>
+  <li>Click Start to begin automatically sending the request at the configured interval</li>
+</ol>
