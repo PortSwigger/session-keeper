@@ -3,10 +3,10 @@ ExtensionType: 2
 Name: Session Keeper
 RepoName: session-keeper
 ScreenVersion: 1.0.0
-SerialVersion: 1
+SerialVersion: 2
 MinPlatformVersion: 2
 ProOnly: False
-Author: JoeBlackSecurity
+Author: Joe Black Security
 ShortDescription: Keeps sessions alive by automatically resending low-impact requests at set intervals, with tab-based multi-session management.
 EntryPoint: session_keeper.py
 BuildCommand: 
