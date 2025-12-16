@@ -1,0 +1,13 @@
+Uuid: 3c04a8add92e445eb5b50acd92275be4
+ExtensionType: 2
+Name: Session Keeper
+RepoName: session-keeper
+ScreenVersion: 1.0.0
+SerialVersion: 1
+MinPlatformVersion: 2
+ProOnly: False
+Author: JoeBlackSecurity
+ShortDescription: Maintains server sessions by automatically resending low-impact requests at set intervals. Facilitates simultaneous management of multiple sessions through a tab-based system.
+EntryPoint: session_keeper.py
+BuildCommand: 
+SupportedProducts: Pro, Community
